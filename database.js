@@ -115,9 +115,9 @@ const criarBanco = async () => {
     console.log("O incidende do ID 3 foi consertado!");
 
 
-    // UPDATE em Massa - Resolver tudo que for "Vazamento de água" de uma vez
+    // UPDATE em Massa - Atualizar para 'Em Análise' tudo que for "Vazamento de água" de uma vez
     await db.run(`UPDATE incidentes SET status_resolucao = 'Em Análise' WHERE tipo_problema = 'Vazamento de água'`);
-    console.log("Todos os problemas de Saneamento entraram 'Em Análise'.");
+    console.log("Todos os problemas de Vazamento de água entraram 'Em Análise'.");
 
 
     // DELETE condicional - Remover tudo que tem o Status da Resolução 'Resolvido' (Limpeza de banco)
@@ -129,7 +129,20 @@ const criarBanco = async () => {
     console.log("--- RELATÓRIO ATUALIZADO (FINAL) ---");
     const resultadoFinal = await db.all('SELECT * FROM incidentes');
     console.log(resultadoFinal);
+
+    // ==========================================================
+    // DIA 3: 20/03 - INTEGRANDO SQLITE COM EXPRESS
+    // ==========================================================
+
+    return db; // Importante: a função agora entrega a "chave" do banco
 }
+// O module.exports cria uma "ponte" que permite compartilhar funções entre arquivos.
+// Neste caso ele exporta a função 'criarBanco'
+module.exports = { criarBanco }
 
-criarBanco()
+// criarBanco()  -  Como agora quem manda no banco é o Servidor, precisamos apagar (ou comentar) essa linha que faz o banco rodar sozinho.
 
+// IMPORTANTE:
+// O Nodemon ainda estava rodando o database.js.
+// Como agora o servidor é o principal, atualize no package.json:
+// "dev": "nodemon server.js"
