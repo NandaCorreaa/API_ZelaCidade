@@ -38,3 +38,38 @@ app.get('/incidentes', async (req, res) => {
     const listaIncidentes = await db.all(`SELECT * FROM incidentes`) // .all() scaneia a tabela e traz uma LISTA (Array) com tudo o que encontrar
     res.json(listaIncidentes) // Entrega a bandeja de dados para o cliente
 })
+
+// ==========================================================
+// DIA 4: 23/03 - ENTRADA DE DADOS E FILTROS DINÂMICOS
+// ==========================================================
+
+// ROTA ESPECÍFICA: Busca apenas UM incidente pelo número do ID
+app.get('/incidentes/:id', async (req, res) => {
+    // req.params pega o número que o usuário digitou na URL (ex: /incidentes/2)
+    const { id } = req.params 
+    
+    const db = await criarBanco()
+    
+    // O '?' é um espaço reservado que será preenchido pelo valor da variável [id]
+    // Isso garante segurança contra ataques (SQL Injection)
+    const incidenteEspecifico = await db.all(`SELECT * FROM incidentes WHERE id = ?`, [id])
+    
+    res.json(incidenteEspecifico)
+})
+
+// ROTA POST: Define uma rota do tipo POST para o endpoint '/incidentes'
+app.post('/incidentes', async (req, res) => {
+    // Desestrutura os dados enviados no corpo da requisição (JSON) para variáveis individuais
+    const {tipo_problema, localizacao, descricao, prioridade, nome_solicitante, contato_solicitante, data_registro, hora_registro, imagem_problema} = req.body
+
+    // Abre a conexão com o banco de dados (função assíncrona)
+    const db = await criarBanco()
+    // Executa o comando SQL para inserir os dados na tabela 'incidentes'
+    // O uso de '?' previne SQL Injection, garantindo que os dados sejam tratados apenas como valores
+    await db.run(`INSERT INTO incidentes (tipo_problema, localizacao, descricao, prioridade, nome_solicitante, contato_solicitante, data_registro, hora_registro, imagem_problema) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+        [tipo_problema, localizacao, descricao, prioridade, nome_solicitante, contato_solicitante, data_registro, hora_registro, imagem_problema])
+
+    // Envia uma resposta de confirmação para o cliente que fez a requisição
+    res.send(`Incidente novo registrado: ${tipo_problema} registrado na data ${data_registro} por ${nome_solicitante}.`)
+})
