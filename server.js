@@ -73,3 +73,45 @@ app.post('/incidentes', async (req, res) => {
     // Envia uma resposta de confirmação para o cliente que fez a requisição
     res.send(`Incidente novo registrado: ${tipo_problema} registrado na data ${data_registro} por ${nome_solicitante}.`)
 })
+
+// ==========================================================
+// DIA 5: 25/03 - ATUALIZAÇÃO E DELEÇÃO DE DADOS
+// ==========================================================
+
+// ROTA DE ATUALIZAÇÃO: responsável por editar um incidente já existente no banco
+app.put('/incidentes/:id', async (req, res) => {
+    // Pega o ID do incidente que vem pela URL (ex: /incidentes/3)
+    const { id } = req.params 
+    // Pega os novos dados enviados no corpo da requisição (o que será atualizado)
+    const { prioridade, descricao, status_resolucao } = req.body 
+    // Abre a conexão com o banco de dados
+    const db = await criarBanco()
+    // Executa o comando SQL de UPDATE:
+    // - Atualiza os campos prioridade, descricao e status_resolucao
+    // - O WHERE garante que apenas o incidente com o ID informado será alterado
+    // - Os "?" são placeholders para evitar SQL Injection (boa prática de segurança)
+    await db.run(
+        `UPDATE incidentes 
+         SET prioridade = ?, descricao = ?, status_resolucao = ?  
+         WHERE id = ?`, 
+        [prioridade, descricao, status_resolucao, id]
+    )
+    // Retorna uma resposta confirmando que a atualização deu certo
+    res.send(`Incidente ${id} atualizado com sucesso!`)
+})
+
+// ROTA DE REMOÇÃO: responsável por apagar um incidente do banco de dados
+app.delete('/incidentes/:id', async (req, res) => {
+    // Pega o ID do incidente que vem pela URL (ex: /incidentes/5)
+    const { id } = req.params
+    // Abre a conexão com o banco de dados
+    const db = await criarBanco()
+    // Executa o comando SQL de DELETE:
+    // - Remove o registro da tabela "incidentes"
+    // - O WHERE garante que apenas o incidente com o ID informado será deletado
+    // - O "?" é um placeholder para evitar SQL Injection (boa prática de segurança)
+    await db.run(`DELETE FROM incidentes WHERE id = ?`, [id])
+    // Retorna uma resposta com status 200 (sucesso)
+    // Informando que o incidente foi removido
+    res.send(`O incidente do id ${id} foi removido com sucesso!`) 
+})
