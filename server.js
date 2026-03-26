@@ -5,9 +5,14 @@
 // IMPORTAÇÕES: Trazendo as ferramentas necessárias
 const express = require('express') // O Framework que cria o servidor e as rotas
 const { criarBanco } = require('./database') // A nossa "chave" que abre a conexão com o banco de dados
+const cors = require('cors') // Importando o pacote que gerencia as permissões de acesso
 
 // INICIALIZAÇÃO: Ligando o motor do servidor
 const app = express()
+
+// Ativando o CORS no nosso servidor
+// O comando app.use(cors()) avisa ao Navegador: "Pode liberar o acesso para qualquer site que queira consultar meus dados!"
+app.use(cors()) 
 
 // TRADUTOR: Configura o Express para entender dados enviados no formato JSON
 app.use(express.json())
@@ -25,7 +30,7 @@ app.get('/', (req, res) => {
 })
 
 // Define a porta onde o servidor vai rodar
-const PORT = 3000
+const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta http://localhost:${PORT}`)
